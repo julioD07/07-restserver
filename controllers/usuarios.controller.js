@@ -1,7 +1,6 @@
 const {request, response} = require('express')
-const brcyptjs = require('bcryptjs')
-
 const Usuario = require('../models/usuario')
+const { encriptarContraseña } = require('../helpers/hashPasswords')
 
 
 const usuariosGet = (req = request, res = response) => {
@@ -19,8 +18,6 @@ const usuariosGet = (req = request, res = response) => {
 
 const usuariosPost = async (req = request, res = response) => {
 
-    
-
     const { nombre, correo, password, rol } = req.body
     const usuario = new Usuario({
         nombre, 
@@ -28,23 +25,11 @@ const usuariosPost = async (req = request, res = response) => {
         password,
         rol
     });
-
-    // Verificar si el correo existe,
-    const existeEmail = await Usuario.findOne({ correo })
-
-    if (existeEmail) {
-        return res.status(400).json({
-            ok: false,
-            msg: `El email ${correo}, ya se encuentra registrado`
-        })
-    }
     
     // Encriptar la contraseña
-    const salt = brcyptjs.genSaltSync();
-    usuario.password = brcyptjs.hashSync(password, salt)
+    usuario.password = await encriptarContraseña(password)
 
     //Guardar en la BD
-
     await usuario.save()
 
     res.json({
@@ -54,14 +39,22 @@ const usuariosPost = async (req = request, res = response) => {
     })
 }
 
-const usuariosPut = (req = request, res = response) => {
+const usuariosPut = async (req = request, res = response) => {
 
     const id = req.params.id
+    const { _id, password, google, correo ,...resto } = req.body;
+
+    // TODO validar contra base de datos
+    if ( password ) {
+        resto.password = await encriptarContraseña(password)
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(id, resto)
 
     res.json({
         ok: true,
         msg: "PUT API CONTROLLER",
-        id
+        usuario
     })
 }
 
