@@ -3,16 +3,25 @@ const Usuario = require('../models/usuario')
 const { encriptarContraseña } = require('../helpers/hashPasswords')
 
 
-const usuariosGet = (req = request, res = response) => {
+const usuariosGet = async (req = request, res = response) => {
 
-    const {q, nombre = 'No name', apiKey, page = 1, limit = 10} = req.query
+    // const {q, nombre = 'No name', apiKey, page = 1, limit = 10} = req.query
+
+    const { limit = 5, desde = 0 } = req.query
+    const query = {estado: true}
+
+    const [total, usuarios] = await Promise.all([
+        Usuario.countDocuments(query),
+        Usuario.find(query)
+                .skip(desde)
+                .limit(Number(limit))
+    ])
 
     res.json({
         ok: true,
-        msg: "GET API CONTROLLER",
-        q, 
-        nombre, 
-        apiKey
+        msg: "Todos los usuarios listados correctamente",
+        total,
+        usuarios
     })
 }
 
@@ -34,7 +43,7 @@ const usuariosPost = async (req = request, res = response) => {
 
     res.json({
         ok: true,
-        msg: "POST API CONTROLLER",
+        msg: "Usuario Creado Correctamente",
         usuario
     })
 }
@@ -53,7 +62,7 @@ const usuariosPut = async (req = request, res = response) => {
 
     res.json({
         ok: true,
-        msg: "PUT API CONTROLLER",
+        msg: "Usuario Registrado Correctamente",
         usuario
     })
 }
@@ -65,10 +74,19 @@ const usuariosPatch = (req = request, res = response) => {
     })
 }
 
-const usuariosDelete = (req = request, res = response) => {
+const usuariosDelete = async (req = request, res = response) => {
+
+    const { id } = req.params
+
+    // Fisicamente lo borramos
+    // const usuario = await Usuario.findByIdAndDelete(id)
+
+    const usuario = await Usuario.findByIdAndUpdate(id, { estado: false })
+
     res.json({
         ok: true,
-        msg: "DELETE API CONTROLLER"
+        msg: "Usuario Eliminado Correctamente",
+        id
     })
 }
 
