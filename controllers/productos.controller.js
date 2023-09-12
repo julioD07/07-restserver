@@ -51,7 +51,7 @@ const crearProductoController = async (req = request, res = response) => {
 
     const { nombre, estado, precio, categoria, descripcion, disponible } = req.body;
 
-    const productoDB = await Producto.findOne({nombre})
+    const productoDB = await Producto.findOne({nombre: req.body.nombre.toUpperCase()})
 
     if (productoDB) {
         return res.status(400).json({
