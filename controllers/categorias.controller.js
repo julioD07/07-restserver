@@ -11,7 +11,7 @@ const obtenerCategoriasController = async (req = request, res = response) => {
         Categoria.countDocuments(query),
         Categoria.find(query)
             .limit(Number(limit))
-            .populate('usuario')
+            .populate('usuario', 'nombre')
             .exec()
     ])
 
@@ -27,7 +27,7 @@ const obtenerCategoriasController = async (req = request, res = response) => {
 const obtenerCategoriaController = async (req = request, res = response) => {
     const { id } = req.params
     const query = {estado: true}
-    const categoria = await Categoria.findById(id).populate('usuario').exec()
+    const categoria = await Categoria.findById(id).populate('usuario', 'nombre').exec()
 
     if (!categoria.estado) {
         return res.status(400).json({
@@ -95,7 +95,6 @@ const actualizarCategoriaController = async (req = request, res = response) => {
         }
 
         const categoria = await Categoria.findByIdAndUpdate(id, data, {new: true})
-        categoria.nombre = nombre
 
         res.json({
             ok: true,

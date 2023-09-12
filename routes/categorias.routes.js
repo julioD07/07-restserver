@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
-const { validarJWT } = require('../middlewares');
+const { validarJWT, esAdminRol } = require('../middlewares');
 const { crearCategoriaController, obtenerCategoriasController, obtenerCategoriaController, actualizarCategoriaController, borrarCategoriaController } = require('../controllers/categorias.controller');
 const { existeCategoriaPorID } = require('../helpers/db-validators');
 
@@ -34,6 +34,7 @@ router.post('/', [
 
 // TODO: Actualizar un registro por id - privado - cualquier persona con un token valido
 router.put('/:id', [
+    validarJWT,
     check('id','No es un ID valido').isMongoId(),
     check('id').custom(existeCategoriaPorID),
     check('nombre', 'El nombre de la categoria es obligatorio').not().isEmpty(),
@@ -42,6 +43,8 @@ router.put('/:id', [
 
 // TODO: Borrar una categoria - Admin
 router.delete('/:id', [
+    validarJWT,
+    esAdminRol,
     check('id','No es un ID valido').isMongoId(),
     check('id').custom(existeCategoriaPorID),
     validarCampos
