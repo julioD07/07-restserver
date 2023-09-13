@@ -1,11 +1,19 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
-const { cargarArchivo } = require('../controllers/uploads.controller');
+const { cargarArchivo, actualizarImagen } = require('../controllers/uploads.controller');
+const { validarArchivoSubir } = require('../middlewares/validar-archivo');
 
 const router = Router()
 
+
 router.post('/', cargarArchivo)
+router.put('/:coleccion/:id', [
+    validarArchivoSubir,
+    check('id', 'El id debe ser de mongo').isMongoId(),
+    check('coleccion', 'no es una coleccion permitida').isIn(['usuarios', 'productos']),
+    validarCampos
+], actualizarImagen)
 
 
 module.exports = router
